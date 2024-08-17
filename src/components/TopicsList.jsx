@@ -1,3 +1,6 @@
+"use client"
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import RemoveBtn from "./RemoveBtn";
 import { HiPencilAlt } from "react-icons/hi";
@@ -18,15 +21,28 @@ const getTopics = async () => {
   }
 };
 
-export default async function TopicsList() {
-  const { topics } = await getTopics();
+export default function TopicsList() {
+  const [topics, setTopics] = useState([]);
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+      const data = await getTopics();
+      setTopics(data.topics);
+    };
+
+    fetchTopics();
+  }, []);
+
+  const handleRemove = (id) => {
+    setTopics((prevTopics) => prevTopics.filter((topic) => topic._id !== id));
+  };
 
   return (
     <>
       {topics.map((t) => (
         <div
           key={t._id}
-          className="p-4 border border-slate-300 my-3 flex justify-between gap-5 items-start"
+          className="p-4 border rounded-xl bg-gray-400 border-slate-300 my-3 flex justify-between gap-5 items-start"
         >
           <div>
             <h2 className="font-bold text-2xl">{t.title}</h2>
@@ -34,7 +50,7 @@ export default async function TopicsList() {
           </div>
 
           <div className="flex gap-2">
-            <RemoveBtn id={t._id} />
+            <RemoveBtn id={t._id} onRemove={handleRemove} />
             <Link href={`/editTopic/${t._id}`}>
               <HiPencilAlt size={24} />
             </Link>
